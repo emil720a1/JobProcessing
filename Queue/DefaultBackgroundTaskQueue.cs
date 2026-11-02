@@ -5,6 +5,9 @@ namespace JobProcessing;
 public class DefaultBackgroundTaskQueue : IBackgroundTaskQueue
 {
     private readonly Channel<Func<CancellationToken, ValueTask>> _queue;
+    private int _queuedCount;
+
+    public int QueuedCount => Volatile.Read(ref _queuedCount);
 
     public DefaultBackgroundTaskQueue(int capacity)
     {
@@ -20,7 +23,17 @@ public class DefaultBackgroundTaskQueue : IBackgroundTaskQueue
     {
         ArgumentNullException.ThrowIfNull(workItem);
 
-        await _queue.Writer.WriteAsync(workItem);
+        Interlocked.Increment(ref _queuedCount);
+
+        try
+        {
+            await _queue.Writer.WriteAsync(workItem);
+        }
+        catch
+        {
+            Interlocked.Decrement(ref _queuedCount);
+            throw;
+        } 
     }
 
     public async ValueTask<Func<CancellationToken, ValueTask>> DequeueAsync(
@@ -28,6 +41,8 @@ public class DefaultBackgroundTaskQueue : IBackgroundTaskQueue
     {
         Func<CancellationToken, ValueTask>? workItem =
             await _queue.Reader.ReadAsync(cancellationToken);
+
+        Interlocked.Decrement(ref _queuedCount);
 
         return workItem;
     }

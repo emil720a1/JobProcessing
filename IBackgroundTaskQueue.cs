@@ -1,4 +1,6 @@
-﻿namespace JobProcessing;
+﻿using System.Threading;
+
+namespace JobProcessing;
 
 public interface IBackgroundTaskQueue
 {
@@ -7,4 +9,6 @@ public interface IBackgroundTaskQueue
 
     ValueTask<Func<CancellationToken, ValueTask>> DequeueAsync(
         CancellationToken CancellationToken);
+
+    int QueuedCount { get; }
 }

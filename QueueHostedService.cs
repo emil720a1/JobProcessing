@@ -30,7 +30,7 @@ public sealed class QueueHostedService(
 	    	}
 	    	catch (OperationCanceledException)
 	    	{
-				// Prevent throwing if stoppingToken was signaled
+				return;
 	    	}
 	    	catch (Exception ex)
 	    	{

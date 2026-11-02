@@ -23,10 +23,25 @@ public sealed class MonitorLoop(
         while (!_cancellationToken.IsCancellationRequested)
         {
             var keyStroke = Console.ReadKey();
-            if (keyStroke.Key == ConsoleKey.W)
+
+            switch (keyStroke.Key)
             {
-                // Enqueue a background work item
-                await taskQueue.QueueBackgroundWorkItemAsync(BuildWorkItemAsync);
+                case ConsoleKey.W:
+                    // Enqueue a background work item
+                    await taskQueue.QueueBackgroundWorkItemAsync(BuildWorkItemAsync);
+                    break;
+                case ConsoleKey.S:
+                    logger.LogInformation(
+                        "Current queued work items: {QueuedCount}",
+                        taskQueue.QueuedCount);
+                    break;
+                case ConsoleKey.Q:
+                    logger.LogInformation("Shutting down...");
+                    applicationLifetime.StopApplication();
+                    return;
+                default:
+                    logger.LogInformation("Press W to add a work item to the background queue or S to show the current queued work items.");
+                    break;
             }
         }
     }

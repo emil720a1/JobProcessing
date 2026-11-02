@@ -50,3 +50,4 @@
 /home/oleh/projects/JobProcessing/obj/Debug/net9.0/JobProcessing.pdb
 /home/oleh/projects/JobProcessing/obj/Debug/net9.0/JobProcessing.genruntimeconfig.cache
 /home/oleh/projects/JobProcessing/obj/Debug/net9.0/ref/JobProcessing.dll
+/home/oleh/projects/JobProcessing/obj/Debug/net9.0/JobProcessing.sourcelink.json
