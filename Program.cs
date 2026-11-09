@@ -2,10 +2,14 @@
 using Microsoft.Extensions.Hosting;
 
 using JobProcessing;
+using App.ScopedService;
 
 
 HostApplicationBuilder builder =
     Host.CreateApplicationBuilder(args);
+
+builder.Services.AddHostedService<ScopedBackgroundService>();
+builder.Services.AddScoped<IScopedProcessingService, DefaultScopedProcessingService>();
 
 
 builder.Services.AddSingleton<MonitorLoop>();
@@ -26,7 +30,7 @@ builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>
 
 IHost host = builder.Build();
 
-MonitorLoop monitorLoop = 
+MonitorLoop monitorLoop =
     host.Services.GetRequiredService<MonitorLoop>();
 
 
