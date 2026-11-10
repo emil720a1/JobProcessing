@@ -11,7 +11,7 @@ HostApplicationBuilder builder =
 builder.Services.AddHostedService<ScopedBackgroundService>();
 builder.Services.AddScoped<IScopedProcessingService, DefaultScopedProcessingService>();
 
-
+builder.Services.AddSingleton <JobProcessor>();
 builder.Services.AddSingleton<MonitorLoop>();
 builder.Services.AddHostedService<QueueHostedService>();
 

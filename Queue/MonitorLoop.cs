@@ -1,11 +1,14 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Entities;
+using JobProcessing.Services;
 
 namespace JobProcessing;
 
 public sealed class MonitorLoop(
     IBackgroundTaskQueue taskQueue,
     ILogger<MonitorLoop> logger,
+    JobProcessor jobProcessor,
     IHostApplicationLifetime applicationLifetime)
 {
     private readonly CancellationToken _cancellationToken =
@@ -27,8 +30,13 @@ public sealed class MonitorLoop(
             switch (keyStroke.Key)
             {
                 case ConsoleKey.W:
+
+                    Job job = new Job();
+
                     // Enqueue a background work item
-                    await taskQueue.QueueBackgroundWorkItemAsync(BuildWorkItemAsync);
+                    await taskQueue.QueueBackgroundWorkItemAsync(
+                        token => new ValueTask(jobProcesor.ProcessAsync(job, token)));
+                        
                     break;
                 case ConsoleKey.S:
                     logger.LogInformation(
