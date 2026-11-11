@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
 using JobProcessing.Services;
 using JobProcessing;
 using App.ScopedService;
@@ -26,6 +27,9 @@ builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>
 
     return new DefaultBackgroundTaskQueue(queueCapacity);
 });
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=jobs.db"));
 
 IHost host = builder.Build();
 
