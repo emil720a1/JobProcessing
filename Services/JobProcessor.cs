@@ -18,7 +18,7 @@ public sealed class JobProcessor
         catch (OperationCanceledException)
         {
             job.Cancel();
-            Console.WriteLine("Operation was cancelled")
+            Console.WriteLine("Operation was cancelled");
         }
         catch (Exception)
         {

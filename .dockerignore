@@ -1,1 +1,7 @@
 .env
+
+bin/
+obj/
+.git/
+.vscode/
+.idea/

@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using JobProcessing.Services;
 using JobProcessing;
 using App.ScopedService;
-
 
 HostApplicationBuilder builder =
     Host.CreateApplicationBuilder(args);

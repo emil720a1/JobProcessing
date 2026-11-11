@@ -5,17 +5,30 @@ using JobProcessing.Services;
 
 namespace JobProcessing;
 
-public sealed class MonitorLoop(
-    IBackgroundTaskQueue taskQueue,
-    ILogger<MonitorLoop> logger,
-    JobProcessor jobProcessor,
-    IHostApplicationLifetime applicationLifetime)
+public sealed class MonitorLoop
 {
-    private readonly CancellationToken _cancellationToken =
-        applicationLifetime.ApplicationStopping;
+    private readonly IBackgroundTaskQueue _taskQueue;
+    private readonly ILogger<MonitorLoop> _logger;
+    private readonly JobProcessor _jobProcessor;
+    private readonly IHostApplicationLifetime _applicationLifetime;
+    private readonly CancellationToken _cancellationToken;
+
+
+    public MonitorLoop(
+        IBackgroundTaskQueue taskQueue,
+        ILogger<MonitorLoop> logger,
+        JobProcessor jobProcessor,
+        IHostApplicationLifetime applicationLifetime)
+    {
+        _jobProcessor = jobProcessor;
+        _taskQueue = taskQueue;
+        _logger = logger;
+        _applicationLifetime = applicationLifetime;
+        _cancellationToken = applicationLifetime.ApplicationStopping;
+    }
 
     public void StartMonitorLoop(){
-        logger.LogInformation($"{nameof(MonitorAsync)} loop is starting.");
+        _logger.LogInformation($"{nameof(MonitorAsync)} loop is starting.");
 
         // Run a console user input loop in a background thread
         Task.Run(async () => await MonitorAsync());
@@ -34,21 +47,22 @@ public sealed class MonitorLoop(
                     Job job = new Job();
 
                     // Enqueue a background work item
-                    await taskQueue.QueueBackgroundWorkItemAsync(
-                        token => new ValueTask(jobProcesor.ProcessAsync(job, token)));
-                        
+                    await _taskQueue.QueueBackgroundWorkItemAsync(
+                        token => new ValueTask(
+                            _jobProcessor.ProcessAsync(job, token)));
+
                     break;
                 case ConsoleKey.S:
-                    logger.LogInformation(
+                    _logger.LogInformation(
                         "Current queued work items: {QueuedCount}",
-                        taskQueue.QueuedCount);
+                        _taskQueue.QueuedCount);
                     break;
                 case ConsoleKey.Q:
-                    logger.LogInformation("Shutting down...");
-                    applicationLifetime.StopApplication();
+                    _logger.LogInformation("Shutting down...");
+                    _applicationLifetime.StopApplication();
                     return;
                 default:
-                    logger.LogInformation("Press W to add a work item to the background queue or S to show the current queued work items.");
+                    _logger.LogInformation("Press W to add a work item to the background queue or S to show the current queued work items.");
                     break;
             }
         }
@@ -62,7 +76,7 @@ public sealed class MonitorLoop(
         int delayLoop = 0;
         var guid = Guid.NewGuid();
 
-        logger.LogInformation("Queued work item {Guid} is starting.", guid);
+        _logger.LogInformation("Queued work item {Guid} is starting.", guid);
 
         while (!token.IsCancellationRequested && delayLoop < 3)
         {
@@ -77,16 +91,16 @@ public sealed class MonitorLoop(
 
             ++ delayLoop;
 
-            logger.LogInformation("Queued work item {Guid} is running. {DelayLoop}/3", guid, delayLoop);
+            _logger.LogInformation("Queued work item {Guid} is running. {DelayLoop}/3", guid, delayLoop);
         }
 
         if (delayLoop is 3)
         {
-            logger.LogInformation("Queued Background Task {Guid} is complete.", guid);
+            _logger.LogInformation("Queued Background Task {Guid} is complete.", guid);
         }
         else
         {
-            logger.LogInformation("Queued Background Task {Guid} was cancelled.", guid);
+            _logger.LogInformation("Queued Background Task {Guid} was cancelled.", guid);
         }
     }
 }
